@@ -114,7 +114,7 @@ public class SparkApp implements Serializable {
         JavaSparkContext sc = new JavaSparkContext(conf);
         createSchema(sc);
         loadData(sc);
-        saveRDDToCass(sc);
+        saveRDDToCassandra(sc);
         queryData(sc);
         accessTableWitRDD(sc);
 
@@ -191,7 +191,7 @@ public class SparkApp implements Serializable {
     }
 
 
-    public void saveRDDToCass(JavaSparkContext sc) {
+    public void saveRDDToCassandra(JavaSparkContext sc) {
         List<TodoItem> todos = Arrays.asList(
                 new TodoItem("George", "Buy a new computer", "Shopping"),
                 new TodoItem("John", "Go to the gym", "Sport"),
@@ -222,13 +222,7 @@ public class SparkApp implements Serializable {
         conf.setAppName("TODO spark and cassandra");
         conf.setMaster("local");
         conf.set("spark.cassandra.connection.host", "localhost");
-//        conf.set("spark.executor.memory", "1g");
-        //       conf.set("spark.cassandra.connection.native.port", "9142");
-///     conf.set("spark.cassandra.connection.rpc.port", "9171");
 
-//        SparkContextJavaFunctions functions = CassandraJavaUtil.javaFunctions(sc);
-//        CassandraJavaRDD<CassandraRow> rdd = functions.cassandraTable("todolist", "todolisttable");
-//        rdd.cache();
 
         SparkApp app = new SparkApp(conf);
         app.run();

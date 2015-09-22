@@ -4,9 +4,9 @@ package com.example;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSQLContext;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SQLContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +30,9 @@ public class SparkSQLApp {
 
     private void run() {
         JavaSparkContext sc = new JavaSparkContext(conf);
-        JavaSQLContext sqlContext = new JavaSQLContext(sc);
+         SQLContext sqlContext = new SQLContext(sc);
 
-        createSchemaRDD(sc, sqlContext);
+        createDataframe(sc, sqlContext);
 
         querySQLData(sqlContext);
 
@@ -40,7 +40,7 @@ public class SparkSQLApp {
 
     }
 
-    public void createSchemaRDD(JavaSparkContext sc, JavaSQLContext sqlContext ) {
+    public void createDataframe(JavaSparkContext sc, SQLContext sqlContext ) {
         List<TodoItem> todos = Arrays.asList(
                 new TodoItem("George", "Buy a new computer", "Shopping"),
                 new TodoItem("John", "Go to the gym", "Sport"),
@@ -52,17 +52,17 @@ public class SparkSQLApp {
         );
         JavaRDD<TodoItem> rdd = sc.parallelize(todos);
 
-        JavaSchemaRDD schemaRDD =   sqlContext.applySchema(rdd, TodoItem.class);
-        sqlContext.registerRDDAsTable(schemaRDD, "todo");
+        DataFrame dataframe =   sqlContext.createDataFrame(rdd, TodoItem.class);
+        sqlContext.registerDataFrameAsTable(dataframe, "todo");
 
         System.out.println("Total number of TodoItems = [" + rdd.count() + "]\n");
 
     }
 
 
-    public void querySQLData(JavaSQLContext sqlContext) {
+    public void querySQLData(SQLContext sqlContext) {
 
-        JavaSchemaRDD result = sqlContext.sql("SELECT * from todo");
+        DataFrame result = sqlContext.sql("SELECT * from todo");
         System.out.println("Queried Todo Items using SQL:\n");
         for (Row row : result.collect()) {
             System.out.println(row);
@@ -81,7 +81,6 @@ public class SparkSQLApp {
         conf.setAppName("TODO sparkSQL and cassandra");
         conf.setMaster("local");
         conf.set("spark.cassandra.connection.host", "localhost");
-
 
 
         SparkSQLApp app = new SparkSQLApp(conf);
